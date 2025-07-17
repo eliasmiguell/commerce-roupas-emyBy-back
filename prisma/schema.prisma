@@ -108,12 +108,20 @@ model Order {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  // Relacionamentos
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
+  // Campos para pedidos guest (sem usuário)
+  customerName    String?
+  customerEmail   String?
+  customerPhone   String?
+  customerAddress String?
+  customerCity    String?
+  customerZipCode String?
+
+  // Relacionamentos (opcionais para pedidos guest)
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
   
-  addressId String
-  address   Address @relation(fields: [addressId], references: [id])
+  addressId String?
+  address   Address? @relation(fields: [addressId], references: [id])
   
   orderItems OrderItem[]
   payment    Payment?

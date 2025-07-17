@@ -2,6 +2,7 @@ import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
 import path from "path"
+// import { imageOptimizer } from "./middleware/imageOptimizer"
 
 // Importar rotas
 import authRoutes from "./routes/auth"
@@ -23,6 +24,10 @@ const PORT = process.env.PORT || 8001
 app.use(cors({
   origin: [
     'http://localhost:3000', 
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'http://localhost:3003',  
+    'http://localhost:3004',
     'https://emy-by.vercel.app',
   ],
   credentials: true,
@@ -33,8 +38,17 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 // Servir arquivos estáticos
-app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")))
+app.use("/uploads", express.static(path.join(__dirname, "../public/uploads"), {
+  setHeaders: (res, path) => {
+    res.set('Access-Control-Allow-Origin', '*')
+    res.set('Access-Control-Allow-Methods', 'GET, OPTIONS')
+    res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  }
+}))
 app.use("/public", express.static(path.join(__dirname, "../public")))
+
+// Middleware de otimização de imagens (após os arquivos estáticos)
+// app.use("/uploads", imageOptimizer)
 
 // Rotas
 app.use("/api/auth", authRoutes)

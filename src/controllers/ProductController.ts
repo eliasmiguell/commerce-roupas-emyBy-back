@@ -125,6 +125,15 @@ export class ProductController {
     try {
       const { name, description, price, categoryId, imageUrl, variants } = req.body
 
+      console.log("Dados recebidos para criar produto:", {
+        name,
+        description,
+        price,
+        categoryId,
+        imageUrl,
+        variants
+      })
+
       // Validações básicas
       if (!name || !price || !categoryId) {
         return res.status(400).json({

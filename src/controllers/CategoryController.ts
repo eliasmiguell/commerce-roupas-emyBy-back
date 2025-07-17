@@ -92,7 +92,7 @@ export class CategoryController {
   // Criar categoria (admin)
   async createCategory(req: AuthRequest, res: Response) {
     try {
-      const { name, description, slug } = req.body
+      const { name, description, slug, imageUrl } = req.body
 
       if (!name || !slug) {
         return res.status(400).json({
@@ -116,6 +116,7 @@ export class CategoryController {
           name,
           description,
           slug,
+          imageUrl: imageUrl || null,
         },
       })
 
@@ -133,7 +134,7 @@ export class CategoryController {
   async updateCategory(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params
-      const { name, description, slug } = req.body
+      const { name, description, slug, imageUrl } = req.body
 
       const category = await prisma.category.update({
         where: { id },
@@ -141,6 +142,7 @@ export class CategoryController {
           ...(name && { name }),
           ...(description !== undefined && { description }),
           ...(slug && { slug }),
+          ...(imageUrl !== undefined && { imageUrl }),
         },
       })
 

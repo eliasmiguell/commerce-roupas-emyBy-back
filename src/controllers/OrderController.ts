@@ -270,36 +270,64 @@ export class OrderController {
   // Criar pedido (admin)
   async createOrderAdmin(req: AuthRequest, res: Response) {
     try {
-      const { userId, status, items } = req.body
-      if (!userId || !items || items.length === 0) {
-        return res.status(400).json({ error: "Usuário e itens são obrigatórios" })
+      const { userId, status, items, customerInfo } = req.body
+      if (!items || items.length === 0) {
+        return res.status(400).json({ error: "Itens são obrigatórios" })
       }
-      const user = await prisma.user.findUnique({ where: { id: userId } })
-      if (!user) {
-        return res.status(404).json({ error: "Usuário não encontrado" })
+
+      let addressId = null
+      let finalUserId = userId
+
+      // Se tem userId, verificar se usuário existe e buscar endereço
+      if (userId && userId !== "guest") {
+        const user = await prisma.user.findUnique({ where: { id: userId } })
+        if (!user) {
+          return res.status(404).json({ error: "Usuário não encontrado" })
+        }
+        
+        const address = await prisma.address.findFirst({ where: { userId, isDefault: true } })
+        if (!address) {
+          return res.status(400).json({ error: "Usuário não possui endereço padrão cadastrado" })
+        }
+        addressId = address.id
+      } else {
+        // Pedido sem usuário (guest) - userId será null
+        finalUserId = null
       }
-      const address = await prisma.address.findFirst({ where: { userId, isDefault: true } })
-      if (!address) {
-        return res.status(400).json({ error: "Usuário não possui endereço padrão cadastrado" })
-      }
+
       const total = items.reduce((sum: number, item: any) => sum + (Number(item.price) * item.quantity), 0)
       const orderNumber = `EMY${Date.now()}`
-      const order = await prisma.order.create({
-        data: {
-          orderNumber,
-          userId,
-          addressId: address.id,
-          status: status || "PENDING",
-          total,
-          orderItems: {
-            create: items.map((item: any) => ({
-              productId: item.productId,
-              variantId: item.variantId || null,
-              quantity: item.quantity,
-              price: item.price,
-            })),
-          },
+
+      const orderData: any = {
+        orderNumber,
+        status: status || "PENDING",
+        total,
+        orderItems: {
+          create: items.map((item: any) => ({
+            productId: item.productId,
+            variantId: item.variantId || null,
+            quantity: item.quantity,
+            price: item.price,
+          })),
         },
+      }
+
+      // Adicionar userId apenas se não for guest
+      if (finalUserId) {
+        orderData.userId = finalUserId
+        orderData.addressId = addressId
+      } else {
+        // Para pedidos guest, armazenar informações do cliente em campos adicionais
+        orderData.customerName = customerInfo?.name
+        orderData.customerEmail = customerInfo?.email
+        orderData.customerPhone = customerInfo?.phone
+        orderData.customerAddress = customerInfo?.address
+        orderData.customerCity = customerInfo?.city
+        orderData.customerZipCode = customerInfo?.zipCode
+      }
+
+      const order = await prisma.order.create({
+        data: orderData,
         include: {
           user: {
             select: {
@@ -317,6 +345,7 @@ export class OrderController {
           address: true,
         },
       })
+      
       res.status(201).json({ message: "Pedido criado com sucesso", order })
     } catch (error) {
       console.error("Erro ao criar pedido:", error)
