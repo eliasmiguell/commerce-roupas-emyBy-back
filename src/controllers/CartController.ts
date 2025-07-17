@@ -75,13 +75,11 @@ export class CartController {
       }
 
       // Verificar se já existe no carrinho
-      const existingItem = await prisma.cartItem.findUnique({
+      const existingItem = await prisma.cartItem.findFirst({
         where: {
-          userId_productId_variantId: {
-            userId: req.user!.userId,
-            productId,
-            variantId,
-          },
+          userId: req.user!.userId,
+          productId,
+          ...(variantId ? { variantId } : { variantId: null }),
         },
       })
 
@@ -119,6 +117,10 @@ export class CartController {
       })
     } catch (error) {
       console.error("Erro ao adicionar ao carrinho:", error)
+      console.error("Detalhes do erro:", {
+        message: (error as Error).message,
+        stack: (error as Error).stack
+      })
       res.status(500).json({ error: "Erro interno do servidor" })
     }
   }

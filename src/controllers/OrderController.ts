@@ -200,4 +200,175 @@ export class OrderController {
       res.status(500).json({ error: "Erro interno do servidor" })
     }
   }
+
+  // ===== MÉTODOS PARA ADMIN =====
+
+  // Listar todos os pedidos (admin)
+  async getAllOrders(req: AuthRequest, res: Response) {
+    try {
+      const orders = await prisma.order.findMany({
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          orderItems: {
+            include: {
+              product: true,
+              variant: true,
+            },
+          },
+          address: true,
+          payment: true,
+        },
+        orderBy: { createdAt: "desc" },
+      })
+      res.json({ orders })
+    } catch (error) {
+      console.error("Erro ao listar pedidos:", error)
+      res.status(500).json({ error: "Erro interno do servidor" })
+    }
+  }
+
+  // Buscar pedido por ID (admin)
+  async getOrderByIdAdmin(req: AuthRequest, res: Response) {
+    try {
+      const { id } = req.params
+      const order = await prisma.order.findUnique({
+        where: { id },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          orderItems: {
+            include: {
+              product: true,
+              variant: true,
+            },
+          },
+          address: true,
+          payment: true,
+        },
+      })
+      if (!order) {
+        return res.status(404).json({ error: "Pedido não encontrado" })
+      }
+      res.json({ order })
+    } catch (error) {
+      console.error("Erro ao buscar pedido:", error)
+      res.status(500).json({ error: "Erro interno do servidor" })
+    }
+  }
+
+  // Criar pedido (admin)
+  async createOrderAdmin(req: AuthRequest, res: Response) {
+    try {
+      const { userId, status, items } = req.body
+      if (!userId || !items || items.length === 0) {
+        return res.status(400).json({ error: "Usuário e itens são obrigatórios" })
+      }
+      const user = await prisma.user.findUnique({ where: { id: userId } })
+      if (!user) {
+        return res.status(404).json({ error: "Usuário não encontrado" })
+      }
+      const address = await prisma.address.findFirst({ where: { userId, isDefault: true } })
+      if (!address) {
+        return res.status(400).json({ error: "Usuário não possui endereço padrão cadastrado" })
+      }
+      const total = items.reduce((sum: number, item: any) => sum + (Number(item.price) * item.quantity), 0)
+      const orderNumber = `EMY${Date.now()}`
+      const order = await prisma.order.create({
+        data: {
+          orderNumber,
+          userId,
+          addressId: address.id,
+          status: status || "PENDING",
+          total,
+          orderItems: {
+            create: items.map((item: any) => ({
+              productId: item.productId,
+              variantId: item.variantId || null,
+              quantity: item.quantity,
+              price: item.price,
+            })),
+          },
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          orderItems: {
+            include: {
+              product: true,
+              variant: true,
+            },
+          },
+          address: true,
+        },
+      })
+      res.status(201).json({ message: "Pedido criado com sucesso", order })
+    } catch (error) {
+      console.error("Erro ao criar pedido:", error)
+      res.status(500).json({ error: "Erro interno do servidor" })
+    }
+  }
+
+  // Atualizar pedido (admin)
+  async updateOrder(req: AuthRequest, res: Response) {
+    try {
+      const { id } = req.params
+      const { status } = req.body
+      const order = await prisma.order.update({
+        where: { id },
+        data: { status },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          orderItems: {
+            include: {
+              product: true,
+              variant: true,
+            },
+          },
+          address: true,
+        },
+      })
+      res.json({ message: "Pedido atualizado com sucesso", order })
+    } catch (error) {
+      console.error("Erro ao atualizar pedido:", error)
+      res.status(500).json({ error: "Erro interno do servidor" })
+    }
+  }
+
+  // Deletar pedido (admin)
+  async deleteOrder(req: AuthRequest, res: Response) {
+    try {
+      const { id } = req.params
+      const order = await prisma.order.findUnique({ where: { id } })
+      if (!order) {
+        return res.status(404).json({ error: "Pedido não encontrado" })
+      }
+      await prisma.order.delete({ where: { id } })
+      res.json({ message: "Pedido deletado com sucesso" })
+    } catch (error) {
+      console.error("Erro ao deletar pedido:", error)
+      res.status(500).json({ error: "Erro interno do servidor" })
+    }
+  }
 }

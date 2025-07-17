@@ -1,6 +1,7 @@
 import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
+import path from "path"
 
 // Importar rotas
 import authRoutes from "./routes/auth"
@@ -9,6 +10,9 @@ import cartRoutes from "./routes/cart"
 import orderRoutes from "./routes/orders"
 import categoryRoutes from "./routes/categories"
 import uploadRoutes from "./routes/upload"
+import userRoutes from "./routes/users"
+import addressRoutes from "./routes/addresses"
+import contactRoutes from "./routes/contact"
 
 dotenv.config()
 
@@ -16,9 +20,18 @@ const app = express()
 const PORT = process.env.PORT || 8001
 
 // Middlewares
-app.use(cors())
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+
+// Servir arquivos estáticos
+app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")))
+app.use("/public", express.static(path.join(__dirname, "../public")))
 
 // Rotas
 app.use("/api/auth", authRoutes)
@@ -27,6 +40,9 @@ app.use("/api/cart", cartRoutes)
 app.use("/api/orders", orderRoutes)
 app.use("/api/categories", categoryRoutes)
 app.use("/api/upload", uploadRoutes)
+app.use("/api/users", userRoutes)
+app.use("/api/addresses", addressRoutes)
+app.use("/api/contact", contactRoutes)
 
 // Rota de teste
 app.get("/api/health", (req, res) => {

@@ -7,6 +7,7 @@ const categoryController = new CategoryController()
 
 // Rotas públicas
 router.get("/", categoryController.getCategories)
+router.get("/id/:id", categoryController.getCategoryById)
 router.get("/:slug", categoryController.getCategoryBySlug)
 
 // Rotas administrativas

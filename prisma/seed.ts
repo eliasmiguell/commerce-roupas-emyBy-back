@@ -158,6 +158,62 @@ async function main() {
         { size: "40", stock: 3 },
       ],
     },
+    // Produtos de Acessórios - Relógios
+    {
+      name: "Relógio Feminino Dourado",
+      description: "Relógio elegante com pulseira dourada",
+      price: 250.0,
+      categoryId: categories[7].id, // Relógios
+      variants: [
+        { size: "Único", stock: 10 },
+      ],
+    },
+    {
+      name: "Relógio Masculino Prata",
+      description: "Relógio clássico com pulseira de aço",
+      price: 380.0,
+      categoryId: categories[7].id, // Relógios
+      variants: [
+        { size: "Único", stock: 8 },
+      ],
+    },
+    {
+      name: "Relógio Smartwatch Rosa",
+      description: "Smartwatch moderno com várias funções",
+      price: 450.0,
+      categoryId: categories[7].id, // Relógios
+      variants: [
+        { size: "Único", stock: 5 },
+      ],
+    },
+    // Produtos de Acessórios - Colares
+    {
+      name: "Colar de Pérolas Clássico",
+      description: "Colar elegante com pérolas naturais",
+      price: 180.0,
+      categoryId: categories[8].id, // Colares
+      variants: [
+        { size: "Único", stock: 12 },
+      ],
+    },
+    {
+      name: "Colar Corrente Dourada",
+      description: "Colar moderno com corrente dourada",
+      price: 120.0,
+      categoryId: categories[8].id, // Colares
+      variants: [
+        { size: "Único", stock: 15 },
+      ],
+    },
+    {
+      name: "Colar Choker Prata",
+      description: "Choker delicado em prata",
+      price: 95.0,
+      categoryId: categories[8].id, // Colares
+      variants: [
+        { size: "Único", stock: 20 },
+      ],
+    },
   ]
 
   for (const productData of products) {

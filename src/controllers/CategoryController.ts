@@ -28,6 +28,39 @@ export class CategoryController {
     }
   }
 
+  // Buscar categoria por ID (público)
+  async getCategoryById(req: Request, res: Response) {
+    try {
+      const { id } = req.params
+
+      const category = await prisma.category.findUnique({
+        where: { id },
+        include: {
+          products: {
+            where: { isActive: true },
+            include: {
+              variants: true,
+            },
+          },
+          _count: {
+            select: {
+              products: true,
+            },
+          },
+        },
+      })
+
+      if (!category) {
+        return res.status(404).json({ error: "Categoria não encontrada" })
+      }
+
+      res.json({ category })
+    } catch (error) {
+      console.error("Erro ao buscar categoria:", error)
+      res.status(500).json({ error: "Erro interno do servidor" })
+    }
+  }
+
   // Buscar categoria por slug (público)
   async getCategoryBySlug(req: Request, res: Response) {
     try {

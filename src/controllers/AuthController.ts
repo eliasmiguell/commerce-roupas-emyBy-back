@@ -78,7 +78,7 @@ export class AuthController {
       })
     } catch (error) {
       console.error("Erro no login:", error)
-      res.status(401).json({ error: error.message })
+      res.status(401).json({ error: (error as Error).message })
     }
   }
 
