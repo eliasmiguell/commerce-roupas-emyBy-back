@@ -1,1 +1,6 @@
-test
+DATABASE_URL="link"
+JWT_SECRET="your-super-secret-jwt-key-change-this-in-production"
+PORT=3434
+NODE_ENV=development
+EMAIL_USER=teste@gmail.com
+EMAIL_PASS=eded tyty t4r
