@@ -24,6 +24,10 @@ const PORT = process.env.PORT || 8001
 app.use(cors({
   origin: [
     'http://localhost:3000', 
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'http://localhost:3003',
+    'http://localhost:3004',
     'https://emy-by.vercel.app',
   ],
   credentials: true,
